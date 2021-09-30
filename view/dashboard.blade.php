@@ -1,16 +1,11 @@
-
-	{-- for($x = 0; $x < 10; $x++) : --}
-		
-		menggandakan kalimat untuk lebih ok
+<ol>
 	
+	{-- for($x=0; $x < 10; $x++) : --}
+
+		<li>
+			bang bang {{$x + 3}}
+		</li>
+
 	{-- endfor --}
-	
-	{!
-	    $x = 50*50
-	!}
-	
-	{{$x}}
 
-<script>
-    alert("ok")
-</script>
+</ol>

@@ -1,47 +1,67 @@
 <?php 
 
 
-// view as blade.php
+// view class 
 
-function view($path){
 
-    $timeload = date('Ymdhis');
 
-	$path = '../view/'.$path;
 
-	if (isset($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
-		$path = str_replace("/public/index.php", "", $_SERVER['PHP_SELF']).'/view/'.$path;
-		$path = $_SERVER['CONTEXT_DOCUMENT_ROOT'].$path;
+class view{
+
+	private $path = null;
+
+	function __construct($path = null){
+		$path = '../view/'.$path;
+		if (isset($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
+			$path = str_replace("/public/index.php", "", $_SERVER['PHP_SELF']).'/view/'.$path;
+			$path = $_SERVER['CONTEXT_DOCUMENT_ROOT'].$path;
+		}
+		$path = $path.'.blade.php';
+		$this->path = $path;
 	}
 
-	$path = $path.'.blade.php';
-	$myfile = fopen($path, 'r') or die("Unable to open file!");
-	$file = fread($myfile,filesize($path));
-	fclose($myfile);
-
-	$file = str_replace("{!", "<?php ", $file);
-	$file = str_replace("!}", " ?> ", $file);
-	$file = str_replace("{{", " <?= ", $file);
-	$file = str_replace("}}", " ?> ", $file);
-    $file = str_replace("--}", "?> ", $file);
-    $file = str_replace("{--", " <?php", $file);
-
-	if (isset($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
-		$myfile = fopen($_SERVER['CONTEXT_DOCUMENT_ROOT'].str_replace("/public/index.php", "", $_SERVER['PHP_SELF'])."/chunk/view".$timeload.".php", "w") or die("Unable to open file!");
-		fwrite($myfile, $file);
+	function __destruct(){
+		$timeload = uniqid();
+		$path = $this->path;
+		$myfile = fopen($path, 'r') or die("Unable to open file!");
+		$file = null;
+		if(filesize($path) > 0){
+			$file = fread($myfile,filesize($path));
+		}else{
+			$file = "";
+		}
 		fclose($myfile);
-		require_once($_SERVER['CONTEXT_DOCUMENT_ROOT'].str_replace("/public/index.php", "", $_SERVER['PHP_SELF'])."/chunk/view".$timeload.".php");
-	    unlink($_SERVER['CONTEXT_DOCUMENT_ROOT'].str_replace("/public/index.php", "", $_SERVER['PHP_SELF'])."/chunk/view".$timeload.".php");
-	}else{
-		$myfile = fopen("../chunk/view".$timeload.".php", "w") or die("Unable to open file!");
-		fwrite($myfile, $file);
-		fclose($myfile);
-		require_once("../chunk/view".$timeload.".php");
-		unlink("../chunk/view".$timeload.".php");
+
+		$file = str_replace("{!", "<?php ", $file);
+		$file = str_replace("!}", " ?> ", $file);
+		$file = str_replace("{{", " <?= ", $file);
+		$file = str_replace("}}", " ?> ", $file);
+	    $file = str_replace("--}", "?> ", $file);
+	    $file = str_replace("{--", " <?php", $file);
+
+		if (isset($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
+			$myfile = fopen($_SERVER['CONTEXT_DOCUMENT_ROOT'].str_replace("/public/index.php", "", $_SERVER['PHP_SELF'])."/chunk/view".$timeload.".php", "w") or die("Unable to open file!");
+			fwrite($myfile, $file);
+			fclose($myfile);
+			require_once($_SERVER['CONTEXT_DOCUMENT_ROOT'].str_replace("/public/index.php", "", $_SERVER['PHP_SELF'])."/chunk/view".$timeload.".php");
+		    unlink($_SERVER['CONTEXT_DOCUMENT_ROOT'].str_replace("/public/index.php", "", $_SERVER['PHP_SELF'])."/chunk/view".$timeload.".php");
+		}else{
+			$myfile = fopen("../chunk/view".$timeload.".php", "w") or die("Unable to open file!");
+			fwrite($myfile, $file);
+			fclose($myfile);
+			require_once("../chunk/view".$timeload.".php");
+			unlink("../chunk/view".$timeload.".php");
+		}
+
 	}
+
 }
 
-// route system
+function view($path = null){
+	return new view($path);
+}
+
+// route class
 
 class Route{
 
@@ -62,6 +82,9 @@ class Route{
 	// add new root config
 
 	public function add($name = '', $method=null){
+
+		// cari argumen config
+
 		$this->{$name} = $method;
 	}
 
@@ -74,7 +97,9 @@ class Route{
 	// set function call on class object
 
 	function __call($name, $arguments){
+
 		return call_user_func($this->{$name}, $arguments);
+	
 	}
 
 	// run class route if calss called
