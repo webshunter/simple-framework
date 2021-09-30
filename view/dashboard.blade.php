@@ -1,10 +1,16 @@
-haloo is file is easy
-@php
 
-	for($x = 0; $x < 10; $x++){
+	{-- for($x = 0; $x < 10; $x++) : --}
 		
-		echo "hallo";
+		menggandakan kalimat untuk lebih ok
 	
-	}
+	{-- endfor --}
+	
+	{!
+	    $x = 50*50
+	!}
+	
+	{{$x}}
 
-@endphp
+<script>
+    alert("ok")
+</script>

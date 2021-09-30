@@ -5,6 +5,8 @@
 
 function view($path){
 
+    $timeload = date('Ymdhis');
+
 	$path = '../view/'.$path;
 
 	if (isset($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
@@ -17,21 +19,25 @@ function view($path){
 	$file = fread($myfile,filesize($path));
 	fclose($myfile);
 
-	$file = str_replace("@php", "<?php ", $file);
-	$file = str_replace("@endphp", " ?> ", $file);
+	$file = str_replace("{!", "<?php ", $file);
+	$file = str_replace("!}", " ?> ", $file);
 	$file = str_replace("{{", " <?= ", $file);
 	$file = str_replace("}}", " ?> ", $file);
+    $file = str_replace("--}", "?> ", $file);
+    $file = str_replace("{--", " <?php", $file);
 
 	if (isset($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
-		$myfile = fopen($_SERVER['CONTEXT_DOCUMENT_ROOT'].str_replace("/public/index.php", "", $_SERVER['PHP_SELF'])."/chunk/view.php", "w") or die("Unable to open file!");
+		$myfile = fopen($_SERVER['CONTEXT_DOCUMENT_ROOT'].str_replace("/public/index.php", "", $_SERVER['PHP_SELF'])."/chunk/view".$timeload.".php", "w") or die("Unable to open file!");
 		fwrite($myfile, $file);
 		fclose($myfile);
-		require_once($_SERVER['CONTEXT_DOCUMENT_ROOT'].str_replace("/public/index.php", "", $_SERVER['PHP_SELF'])."/chunk/view.php");
+		require_once($_SERVER['CONTEXT_DOCUMENT_ROOT'].str_replace("/public/index.php", "", $_SERVER['PHP_SELF'])."/chunk/view".$timeload.".php");
+	    unlink($_SERVER['CONTEXT_DOCUMENT_ROOT'].str_replace("/public/index.php", "", $_SERVER['PHP_SELF'])."/chunk/view".$timeload.".php");
 	}else{
-		$myfile = fopen("../chunk/view.php", "w") or die("Unable to open file!");
+		$myfile = fopen("../chunk/view".$timeload.".php", "w") or die("Unable to open file!");
 		fwrite($myfile, $file);
 		fclose($myfile);
-		require_once("../chunk/view.php");
+		require_once("../chunk/view".$timeload.".php");
+		unlink("../chunk/view".$timeload.".php");
 	}
 }
 
@@ -40,6 +46,7 @@ function view($path){
 class Route{
 
 	private $path = null;
+	private $err404 = null;
 	
 	function __construct(){
 		$this->path();
@@ -54,7 +61,7 @@ class Route{
 
 	// add new root config
 
-	public function add($name = '', $method){
+	public function add($name = '', $method=null){
 		$this->{$name} = $method;
 	}
 
@@ -82,4 +89,3 @@ class Route{
 	}
 
 }
-
