@@ -1,17 +1,13 @@
 <?php 
 
-
 // view class 
-
-
-
 
 class view{
 
 	private $path = null;
 
 	function __construct($path = null){
-		$path = '../view/'.$path;
+		$path = '../view/'.str_replace(".", "/", $path);
 		if (isset($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
 			$path = str_replace("/public/index.php", "", $_SERVER['PHP_SELF']).'/view/'.$path;
 			$path = $_SERVER['CONTEXT_DOCUMENT_ROOT'].$path;
@@ -20,9 +16,20 @@ class view{
 		$this->path = $path;
 	}
 
-	function __destruct(){
+	private function temp($path = null){
+		$path = '../view/'.str_replace(".", "/", $path);
+		if (isset($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
+			$path = str_replace("/public/index.php", "", $_SERVER['PHP_SELF']).'/view/'.$path;
+			$path = $_SERVER['CONTEXT_DOCUMENT_ROOT'].$path;
+		}
+		$path = $path.'.blade.php';
+		if(file_exists($path)){
+			$this->callView($path);
+		}
+	}
+
+	function callView($path = null){
 		$timeload = uniqid();
-		$path = $this->path;
 		$myfile = fopen($path, 'r') or die("Unable to open file!");
 		$file = null;
 		if(filesize($path) > 0){
@@ -31,13 +38,14 @@ class view{
 			$file = "";
 		}
 		fclose($myfile);
-
 		$file = str_replace("{!", "<?php ", $file);
 		$file = str_replace("!}", " ?> ", $file);
 		$file = str_replace("{{", " <?= ", $file);
 		$file = str_replace("}}", " ?> ", $file);
 	    $file = str_replace("--}", "?> ", $file);
 	    $file = str_replace("{--", " <?php", $file);
+	    $file = str_replace("{<", " <?php \$this->temp('", $file);
+	    $file = str_replace(">}", "'); ?> ", $file);
 
 		if (isset($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
 			$myfile = fopen($_SERVER['CONTEXT_DOCUMENT_ROOT'].str_replace("/public/index.php", "", $_SERVER['PHP_SELF'])."/chunk/view".$timeload.".php", "w") or die("Unable to open file!");
@@ -52,7 +60,13 @@ class view{
 			require_once("../chunk/view".$timeload.".php");
 			unlink("../chunk/view".$timeload.".php");
 		}
+	}
 
+	function __destruct(){
+		$path = $this->path;
+		if(file_exists($path)){
+			$this->callView($path);
+		}
 	}
 
 }
@@ -80,7 +94,6 @@ class Route{
 
 
 	// add new root config
-
 	public function add($name = '', $method=null){
 
 		// cari argumen config
@@ -97,13 +110,10 @@ class Route{
 	// set function call on class object
 
 	function __call($name, $arguments){
-
 		return call_user_func($this->{$name}, $arguments);
-	
 	}
 
 	// run class route if calss called
-
 	function __destruct(){
 		$route = str_replace($this->path, "", $_SERVER['REQUEST_URI']); 
 		if(isset($this->$route)){
