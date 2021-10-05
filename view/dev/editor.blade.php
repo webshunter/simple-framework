@@ -1,1 +1,12 @@
-i am a developer machin to help you make website be easy
+{!
+	$man = "free";
+
+	$pair = <<<EOD
+	hahahahha
+	simple $man
+	EOD;
+
+	echo $pair;
+
+
+!}

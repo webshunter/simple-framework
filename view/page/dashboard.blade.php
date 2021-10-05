@@ -1,7 +1,5 @@
 <!-- load head app -->
-
 {<head>}
-
 	<div class="flex-container">
 		<div class="user-panel">
 			<div class="user-foto">
