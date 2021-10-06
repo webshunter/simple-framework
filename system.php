@@ -53,20 +53,15 @@ class view{
 			$file = "";
 		}
 		fclose($myfile);
-		
 		$file = str_replace("{!", "<?php ", $file);
-		
 		$file = str_replace("!}", " ?> ", $file);
-		
 		$file = str_replace("{{", " <?= ", $file);
-		
 		$file = str_replace("}}", " ?> ", $file);
-	    
-		$file = str_replace("--}", "?> ", $file);
-
+	    $file = str_replace("--}", "?> ", $file);
 	    $file = str_replace("{--", " <?php", $file);
+	    $file = str_replace("{<", " <?php \$this->temp('", $file);
+	    $file = str_replace(">}", "'); ?> ", $file);
 
-	    if($type == 0){
 			if (isset($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
 				$myfile = fopen($_SERVER['CONTEXT_DOCUMENT_ROOT'].str_replace("/public/index.php", "", $_SERVER['PHP_SELF'])."/chunk/view".$timeload.".php", "w") or die("Unable to open file!");
 				fwrite($myfile, $file);
@@ -80,9 +75,7 @@ class view{
 				require_once("../chunk/view".$timeload.".php");
 				unlink("../chunk/view".$timeload.".php");
 			}
-	    }else{
-	    	return $file;
-	    }
+			
 	}
 
 	public function customeTeplate($value='')
